@@ -23,7 +23,7 @@ const depthMaterial = new MeshBasicMaterial({
 
 const target = new WebGLRenderTarget( 100, 100 );
 target.texture.format = RGBFormat;
-target.texture.generateMipmaps = true;
+target.texture.generateMipmaps = false;
 target.stencilBuffer = false;
 target.depthBuffer = true;
 target.depthTexture = new DepthTexture();
@@ -249,8 +249,9 @@ AFRAME.registerComponent('toon-ocean', {
     const thisObject = this.el.object3D;
     
     if(scene.isRendering) return;
+
+    // this is to avoid calling onBeforeRender recursively
     scene.isRendering = true;
-    
     
     const cameras = camera.cameras || [camera];
 
@@ -258,6 +259,7 @@ AFRAME.registerComponent('toon-ocean', {
     scene.overrideMaterial = depthMaterial;
     renderer.getDrawingBufferSize(temp);
     
+    // We need vr disabled in the renderer but keep track of its state to reset it when we finish
     var vrEnabled = renderer.vr.enabled;
     renderer.vr.enabled = false;
     
@@ -269,25 +271,29 @@ AFRAME.registerComponent('toon-ocean', {
     renderer.setRenderTarget( target );
     
     cameras.forEach((c,i)=>{
-      if(cameras.length == 1) {
-        target.viewport.set(0, 0, target.width, target.height);
-      } else {
+      if(cameras.length == 1) { // Non VR mode
+        target.viewport.set(0, 0, target.width, target.height); 
+      } else { // VR Mode
         if(i) {
-          target.viewport.set(target.width / 2, 0, target.width/2, target.height);
+          target.viewport.set(target.width / 2, 0, target.width/2, target.height); // Right eye
         } else {
-          target.viewport.set(0, 0, target.width/2, target.height);
+          target.viewport.set(0, 0, target.width/2, target.height); // Left eye
         }
       }
       
       renderer.render( scene, c );
-      delete scene.isRendering;
+      
     });
     
     
     thisObject.visible = true;
     renderer.setRenderTarget( null );
+
+    // reset vr state in the renderer
     renderer.vr.enabled = vrEnabled;
+    
     scene.overrideMaterial = null;
+    delete scene.isRendering;
   }
 });
 
