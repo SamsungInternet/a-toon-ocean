@@ -23,7 +23,7 @@ const depthMaterial = new MeshBasicMaterial({
 
 const target = new WebGLRenderTarget( 100, 100 );
 target.texture.format = RGBFormat;
-target.texture.generateMipmaps = false;
+target.texture.generateMipmaps = true;
 target.stencilBuffer = false;
 target.depthBuffer = true;
 target.depthTexture = new DepthTexture();
@@ -248,49 +248,43 @@ AFRAME.registerComponent('toon-ocean', {
     const material = this.el.components.material.material;
     const thisObject = this.el.object3D;
     
-    if(scene.isRendering) return;
-
-    // this is to avoid calling onBeforeRender recursively
-    scene.isRendering = true;
+    if(!thisObject.visible) return;
     
     const cameras = camera.cameras || [camera];
 
     thisObject.visible = false;
     scene.overrideMaterial = depthMaterial;
     renderer.getDrawingBufferSize(temp);
+      
+    var vrEnabled = renderer.xr.enabled;
+    renderer.xr.enabled = false;
+    renderer.autoClearDepth = false;
+    renderer.autoClearColor = false;
     
-    // We need vr disabled in the renderer but keep track of its state to reset it when we finish
-    var vrEnabled = renderer.vr.enabled;
-    renderer.vr.enabled = false;
     
     this.el.setAttribute('material', 'resolution', `${temp.x} ${temp.y}`);
-    target.setSize( powerOfTwo(temp.x), powerOfTwo(temp.y) );
+    target.setSize( temp.x, temp.y );
     
     this.el.setAttribute('material', 'camera_near', camera.near);
     this.el.setAttribute('material', 'camera_far', camera.far);
     renderer.setRenderTarget( target );
     
-    cameras.forEach((c,i)=>{
-      if(cameras.length == 1) { // Non VR mode
-        target.viewport.set(0, 0, target.width, target.height); 
-      } else { // VR Mode
-        if(i) {
-          target.viewport.set(target.width / 2, 0, target.width/2, target.height); // Right eye
-        } else {
-          target.viewport.set(0, 0, target.width/2, target.height); // Left eye
-        }
-      }
-      
-      renderer.render( scene, c );
-      
-    });
+    renderer.clearDepth();
+    renderer.clearColor();
+    scene.autoUpdate = false;
     
+    
+    
+    renderer.render( scene, camera );
+    
+    scene.autoUpdate = true;
     
     thisObject.visible = true;
     renderer.setRenderTarget( null );
-
-    // reset vr state in the renderer
-    renderer.vr.enabled = vrEnabled;
+    
+    renderer.xr.enabled = vrEnabled;
+    renderer.autoClearDepth = true;
+    renderer.autoClearColor = true;
     
     scene.overrideMaterial = null;
     delete scene.isRendering;
