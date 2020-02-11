@@ -251,12 +251,15 @@ AFRAME.registerComponent('toon-ocean', {
     if(scene.isRendering) return;
     scene.isRendering = true;
     
-    //renderer.setPixelRatio(1);
+    
     const cameras = camera.cameras || [camera];
 
     thisObject.visible = false;
     scene.overrideMaterial = depthMaterial;
     renderer.getDrawingBufferSize(temp);
+    
+    var vrEnabled = renderer.vr.enabled;
+    renderer.vr.enabled = false;
     
     this.el.setAttribute('material', 'resolution', `${temp.x} ${temp.y}`);
     target.setSize( powerOfTwo(temp.x), powerOfTwo(temp.y) );
@@ -283,6 +286,7 @@ AFRAME.registerComponent('toon-ocean', {
     
     thisObject.visible = true;
     renderer.setRenderTarget( null );
+    renderer.vr.enabled = vrEnabled;
     scene.overrideMaterial = null;
   }
 });
