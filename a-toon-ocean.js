@@ -23,7 +23,7 @@ const depthMaterial = new MeshBasicMaterial({
 
 const target = new WebGLRenderTarget( 100, 100 );
 target.texture.format = RGBFormat;
-target.texture.generateMipmaps = false;
+target.texture.generateMipmaps = true;
 target.stencilBuffer = false;
 target.depthBuffer = true;
 target.depthTexture = new DepthTexture();
@@ -142,7 +142,7 @@ AFRAME.registerShader('toon-ocean', {
     opacity_deep: { is: 'uniform', default: 1.0 },
     opacity_foam: { is: 'uniform', default: 0.6 },
     repeat: { is: 'uniform', default: 10 },
-    max_depth: { is: 'uniform', default: 3 },
+    max_depth: { is: 'uniform', default: 3 }
   },
   fragmentShader: `
     #include <packing>
@@ -239,30 +239,68 @@ AFRAME.registerComponent('toon-ocean', {
     const material = this.el.components.material.material;
     this.el.setAttribute('material', 'depth_map', target.depthTexture);
     this.el.setAttribute('material', 'map', generateCausticCanvasTexture(10));
+    this.el.sceneEl.object3D.onBeforeRender = this.beforeRender.bind(this);
+    
   },
 
-  tick () {
+  beforeRender (r,s,camera) {
     const renderer = this.el.sceneEl.renderer;
     const scene = this.el.sceneEl.object3D;
-    const camera = this.el.sceneEl.camera;
     const material = this.el.components.material.material;
     const thisObject = this.el.object3D;
     
-    this.el.setAttribute('material', 'camera_near', camera.near);
-    this.el.setAttribute('material', 'camera_far', camera.far);
+    if(!thisObject.visible) return;
     
-    // In case the scene has changed size update the uniform and the render target size.
-    renderer.getDrawingBufferSize(temp);
-    this.el.setAttribute('material', 'resolution', `${temp.x} ${temp.y}`);
-    target.setSize( powerOfTwo(temp.x), powerOfTwo(temp.y) );
+    const cameras = camera.cameras || [camera];
 
     thisObject.visible = false;
-    renderer.setRenderTarget( target );
     scene.overrideMaterial = depthMaterial;
+    renderer.getDrawingBufferSize(temp);
+      
+    var vrEnabled = renderer.xr.enabled;
+    renderer.xr.enabled = false;
+    renderer.autoClearDepth = false;
+    renderer.autoClearColor = false;
+    
+    
+    this.el.setAttribute('material', 'resolution', `${temp.x} ${temp.y}`);
+    target.setSize( temp.x, temp.y );
+    
+    this.el.setAttribute('material', 'camera_near', camera.near);
+    this.el.setAttribute('material', 'camera_far', camera.far);
+    renderer.setRenderTarget( target );
+    
+    renderer.clearDepth();
+    renderer.clearColor();
+    scene.autoUpdate = false;
+    
+    /*
+    cameras.forEach((c,i)=>{
+      if(cameras.length == 1) {
+        target.viewport.set(0, 0, target.width, target.height);
+      } else {
+        
+        target.viewport = c.viewport;
+        alert(JSON.stringify(c.viewport));
+      }
+      
+      renderer.render( scene, c);
+      
+    });
+    */
+    
+    
     renderer.render( scene, camera );
-
+    
+    scene.autoUpdate = true;
+    
     thisObject.visible = true;
     renderer.setRenderTarget( null );
+    
+    renderer.xr.enabled = vrEnabled;
+    renderer.autoClearDepth = true;
+    renderer.autoClearColor = true;
+    
     scene.overrideMaterial = null;
   }
 });

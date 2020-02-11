@@ -18,24 +18,27 @@
     />
   </head>
   <body>
-    <script src="https://aframe.io/releases/1.0.3/aframe.min.js"></script>
+    <!--script src="https://aframe.io/releases/1.0.3/aframe.min.js"></script-->
+    <script src="./aframe.js"></script>
     <script src="./a-toon-ocean.js" type="module"></script>
     <script src="./gradient-shader.js"></script>
     <a-scene background="color: #FAFAFA" style="position:absolute;">
       <a-camera near="0.2"></a-camera>
-      <a-box position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9" shadow></a-box>
-      <a-sphere position="0 1.25 -5" radius="1.25" color="#EF2D5E" shadow></a-sphere>
-      <a-cylinder position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D" shadow></a-cylinder>
-      <a-box position="0 -2 -4" rotation="-90 0 0" width="4" height="4" depth="4" color="#7BC8A4" shadow></a-box>
+      <a-entity position="0 0 0">
+        <a-box position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9" shadow></a-box>
+        <a-sphere position="0 1.25 -5" radius="1.25" color="#EF2D5E" shadow></a-sphere>
+        <a-cylinder position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D" shadow></a-cylinder>
+        <a-box position="0 -2 -4" rotation="-90 0 0" width="4" height="4" depth="4" color="#7BC8A4" shadow></a-box>
 
-      <!-- https://poly.google.com/view/0t2ZYRBsqX- lighthouse by Google -->
-      <a-gltf-model src="https://cdn.glitch.com/f22190f7-cd78-4a3a-8e33-9d075ddbf7da%2FLighthouse.glb?v=1580395771800" position="-3 0 -15"></a-gltf-model>
-      
-      <!-- the toon ocean -->
-      <a-toon-ocean width="100" height="100" repeat="100" position="0 1 0" rotation="-90 0 0"></a-toon-ocean>
-      
-      <!-- the skybox, is a gradient -->
-      <a-sky material="shader:gradient4;stops:0.47 0.52 0.8 1.5; color1: orange; color2: skyblue; color3: blue; color4: black;"></a-sky>
+        <!-- https://poly.google.com/view/0t2ZYRBsqX- lighthouse by Google -->
+        <a-gltf-model src="https://cdn.glitch.com/f22190f7-cd78-4a3a-8e33-9d075ddbf7da%2FLighthouse.glb?v=1580395771800" position="-3 0 -15"></a-gltf-model>
+
+        <!-- the toon ocean -->
+        <a-toon-ocean width="100" height="100" repeat="100" position="0 1 0" rotation="-90 0 0"></a-toon-ocean>
+
+        <!-- the skybox, is a gradient -->
+        <a-sky material="shader:gradient4;stops:0.47 0.52 0.8 1.5; color1: orange; color2: skyblue; color3: blue; color4: black;"></a-sky>
+      </a-entity>
     </a-scene>
     <img src="https://stats.ada.is/counter.png?fallback=a-toon-ocean&color=black" alt="" style="vertical-align: bottom;" aria-hidden="true">
   </body>
