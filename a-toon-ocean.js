@@ -240,7 +240,6 @@ AFRAME.registerComponent('toon-ocean', {
     this.el.setAttribute('material', 'depth_map', target.depthTexture);
     this.el.setAttribute('material', 'map', generateCausticCanvasTexture(10));
     this.el.sceneEl.object3D.onBeforeRender = this.beforeRender.bind(this);
-    
   },
 
   beforeRender (r,s,camera) {
@@ -274,20 +273,6 @@ AFRAME.registerComponent('toon-ocean', {
     renderer.clearColor();
     scene.autoUpdate = false;
     
-    /*
-    cameras.forEach((c,i)=>{
-      if(cameras.length == 1) {
-        target.viewport.set(0, 0, target.width, target.height);
-      } else {
-        
-        target.viewport = c.viewport;
-        alert(JSON.stringify(c.viewport));
-      }
-      
-      renderer.render( scene, c);
-      
-    });
-    */
     
     
     renderer.render( scene, camera );
@@ -302,6 +287,7 @@ AFRAME.registerComponent('toon-ocean', {
     renderer.autoClearColor = true;
     
     scene.overrideMaterial = null;
+    delete scene.isRendering;
   }
 });
 
